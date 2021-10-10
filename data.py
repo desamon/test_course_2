@@ -1,0 +1,1 @@
+data_for_test = [('', '!QAZ2wsx'), ('qa_test@test.ru', ''), ('qa_test', '!QAZ2wsx'), ('noxion@bk.ru', '123')]

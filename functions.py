@@ -46,7 +46,7 @@ def element_is_present(browser: Chrome, locator: Tuple, timeout: int = 5) -> boo
    except TimeoutException:
        return False
 
-def login(browser):
+def login(browser: Chrome, email: str, password: str) -> None:
    """Функция логина на стенде без использования ожиданий"""
    email = browser.find_element(By.NAME, "email")
    email.send_keys("qa_test@test.ru")

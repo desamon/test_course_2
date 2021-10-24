@@ -46,12 +46,10 @@ def element_is_present(browser: Chrome, locator: Tuple, timeout: int = 5) -> boo
    except TimeoutException:
        return False
 
-def login(browser: Chrome, email: str, password: str) -> None:
-   """Функция логина на стенде без использования ожиданий"""
-   email = browser.find_element(By.NAME, "email")
-   email.send_keys("qa_test@test.ru")
-   password = browser.find_element(By.NAME, "password")
-   password.send_keys("!QAZ2wsx")
-   browser.find_element(By.CLASS_NAME, "button").click()
 
-   
+def login_ui(browser: Chrome, email: str, password: str) -> None:
+   """Функция логина на стенде через UI"""
+   wait_until_clickable(browser, (By.NAME, "email")).send_keys(email)
+   wait_until_clickable(browser, (By.NAME, "password")).send_keys(password)
+   wait_until_clickable(browser, (By.CLASS_NAME, "button")).click()
+

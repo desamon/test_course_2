@@ -1,2 +1,4 @@
 venv
 .idea
+__pycache__/functions.cpython-38.pyc
+__pycache__/test_authorization.cpython-38-pytest-6.2.2.pyc

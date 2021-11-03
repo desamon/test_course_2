@@ -1,19 +1,15 @@
-import faker
 import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+
 from api.api_helpers import delete_all_posts
 from api.blog_api import BlogApi
 from constants import Links
-from functions import wait_until_clickable, wait_until_visible, element_is_present
-
-
-class TestBlog:
-    def test_post_blog(self, browser, login):
-        browser.get(Links.blog)
-        wait_until_clickable(browser, (By.CSS_SELECTOR, '[href="/blog/page/1/test-post/"]')).click()
-        post_text = wait_until_visible(browser, (By.CSS_SELECTOR, ".container p+p"))
-        assert post_text.text == "Hello world!", "Неверный текст!"
+from functions import wait_until_visible, element_is_present
+from pages.base_page import BasePage
+from pages.blog_pages.main_page import MainPage
+from pages.blog_pages.post_modify_page import PostModifyPage
+from pages.blog_pages.post_page import PostPage
 
 
 @pytest.fixture()
@@ -22,61 +18,72 @@ def delete_user_posts(url):
     delete_all_posts(url)
 
 
-class TestsBlogOpen:
-    def test_open_post(self, browser, url, create_post_for_blog, delete_user_posts):
-        browser.get(url + Links.blog)
-        title, text = create_post_for_blog
-        wait_until_clickable(browser, (By.XPATH, f'//h1[text()="{title}"]')).click()
-        post_text = wait_until_visible(browser, (By.CSS_SELECTOR, ".container p+p"))
-
-        assert post_text.text == text, "Текст не совпадает"
-
-
 @pytest.fixture()
-def create_post_for_blog(faker, url):
+def create_post_for_test(url, faker):
     api = BlogApi(url)
     title = faker.text(10)
-    text = faker.text
+    text = faker.text(100)
     api.create_post(title=title, text=text, tags=[faker.text(5)])
     return title, text
 
 
 @pytest.mark.usefixtures("delete_user_posts")
+class TestsBlogOpen:
+    @pytest.fixture(autouse=True)
+    def setup(self, browser, url):
+        self.blog_page = MainPage(browser, url + Links.blog)
+        self.post_page = PostPage(browser, url + Links.blog)
+
+    def test_open_post(self, create_post_for_test):
+        title, text = create_post_for_test
+
+        self.blog_page.open_page()
+        self.blog_page.click_on_post_title(title)
+        self.post_page.check_post_text(text)
+
+
+@pytest.mark.usefixtures("delete_user_posts")
 class TestsBlogModify:
-    @pytest.mark.usefixtures("delete_user_posts")
-    class TestsBlogModify:
-        def test_create_post(self, browser, url, faker):
-            browser.get(url + Links.blog)
-            wait_until_clickable(browser, (By.ID, "new")).click()
-            title = faker.text(10)
-            wait_until_clickable(browser, (By.ID, "title")).send_keys(title)
-            wait_until_clickable(browser, (By.ID, "text")).send_keys(faker.text(100))
-            wait_until_clickable(browser, (By.ID, "tags")).send_keys(faker.text(5))
-            wait_until_clickable(browser, (By.ID, "submit")).click()
+    @pytest.fixture(autouse=True)
+    def setup(self, browser, url):
+        self.blog_page = MainPage(browser, url + Links.blog)
+        self.post_modify_page = PostModifyPage(browser, url + Links.blog)
+        self.base_page = BasePage(browser, url + Links.blog)
+        self.post_page = PostPage(browser, url + Links.blog)
 
-            assert "Blog posted successfully!" in wait_until_visible(browser, (By.ID, "alert_div")).text, \
-                "Не отобразилось сообщение об успехе"
-            assert wait_until_visible(browser, (By.TAG_NAME, "h1")).text == title, "Пост не опубликовался"
+    def test_create_post(self, browser, url, faker):
+        title = faker.text(10)
 
-    def test_change_post(self, browser, url, create_post_for_blog):
-        browser.get(url + Links.blog)
-        title, text = create_post_for_blog
-        wait_until_clickable(browser, (By.XPATH, f'//h1[text()="{title}"]')).click()
-        wait_until_clickable(browser, (By.ID, "edit")).click()
-        wait_until_clickable(browser, (By.ID, "title")).send_keys(Keys.BACKSPACE)
-        wait_until_clickable(browser, (By.ID, "submit")).click()
+        self.blog_page.open_page()
+        self.blog_page.click_create_post_button()
+
+        self.post_modify_page.add_title(title)
+        self.post_modify_page.add_text(faker.text(100))
+        self.post_modify_page.add_tags(faker.text(5))
+        self.post_modify_page.click_submit_button()
+
+        self.blog_page.check_post_created_successfully_message()
+        self.blog_page.check_post_exists(title)
+
+    def test_change_post(self, browser, url, create_post_for_test):
+        self.blog_page.open_page()
+        title, text = create_post_for_test
+        self.blog_page.check_post_exists(title)
+        self.blog_page.click_on_post_title(title)  # кликаем по заголовку созданного поста
+        self.post_page.click_edit_button()  # нажимаем на edit для редактирования
+        self.post_modify_page.add_title(Keys.BACKSPACE)  # у заголовка убираем 1 символ в конце
+        self.post_modify_page.click_submit_button()  # сохраняем пост
 
         assert wait_until_visible(browser, (By.TAG_NAME, 'h1',)).text == title[:-1], "Заголовок не отредактированный"
-        #убираем символ с конца
+        # проверяем с помощью срезов
 
-    def test_delete_user_post(self, browser, url, create_post_for_blog):
+    def test_delete_user_post(self, browser, url, create_post_for_test):
         browser.get(url + Links.blog)
-        title, text = create_post_for_blog
-        wait_until_clickable(browser, (By.XPATH, f'//h1[text()="{title}"]')).click()
-        wait_until_clickable(browser, (By.ID, "delete")).click()
-        wait_until_clickable(browser, (By.ID, "confirmedDelete")).click()
+        title, text = create_post_for_test
+        self.blog_page.click_on_post_title(title)  # кликаем по заголовку созданного поста
+        self.post_page.click_delete_button()
+        self.post_page.confirm_delete()  # подтверждаем удаление
 
         assert "Your post was successfully deleted" in wait_until_visible(browser, (By.ID, "alert_div")).text, \
             "Нет сообщения об успехе"
-        assert not element_is_present(browser, (By.XPATH, f'//h1[text()="{title}"]'), 0.5), "Пост не удален"
-
+        assert not element_is_present(browser, (By.XPATH, f'//h1[text()="{title}"]'), 1), "Пост не удален"

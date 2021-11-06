@@ -33,4 +33,8 @@ class TestAuthorizationClass:
         self.blog_page.open_page()
         self.blog_page.check_unauthorized_user_cannot_create_post()
 
+    def test_login_negative(self, browser, url, email, password):
+        browser.get(url + Links.login)
+        login_ui(browser, email, password)
+        wait_until_clickable(browser, (By.CLASS_NAME, "button"))
 

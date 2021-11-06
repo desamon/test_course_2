@@ -84,5 +84,3 @@ class TestsBlogModify:
         self.blog_page.click_on_post_title(title)
         self.post_page.delete_post()
         self.blog_page.check_post_is_deleted(title)
-
-

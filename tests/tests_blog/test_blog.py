@@ -1,4 +1,3 @@
-import faker
 import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -6,14 +5,6 @@ from api.api_helpers import delete_all_posts
 from api.blog_api import BlogApi
 from constants import Links
 from functions import wait_until_clickable, wait_until_visible, element_is_present
-
-
-class TestBlog:
-    def test_post_blog(self, browser, login):
-        browser.get(Links.blog)
-        wait_until_clickable(browser, (By.CSS_SELECTOR, '[href="/blog/page/1/test-post/"]')).click()
-        post_text = wait_until_visible(browser, (By.CSS_SELECTOR, ".container p+p"))
-        assert post_text.text == "Hello world!", "Неверный текст!"
 
 
 @pytest.fixture()
@@ -43,8 +34,6 @@ def create_post_for_blog(faker, url):
 
 @pytest.mark.usefixtures("delete_user_posts")
 class TestsBlogModify:
-    @pytest.mark.usefixtures("delete_user_posts")
-    class TestsBlogModify:
         def test_create_post(self, browser, url, faker):
             browser.get(url + Links.blog)
             wait_until_clickable(browser, (By.ID, "new")).click()
@@ -66,8 +55,8 @@ class TestsBlogModify:
         wait_until_clickable(browser, (By.ID, "title")).send_keys(Keys.BACKSPACE)
         wait_until_clickable(browser, (By.ID, "submit")).click()
 
+        # убираем символ с конца
         assert wait_until_visible(browser, (By.TAG_NAME, 'h1',)).text == title[:-1], "Заголовок не отредактированный"
-        #убираем символ с конца
 
     def test_delete_user_post(self, browser, url, create_post_for_blog):
         browser.get(url + Links.blog)
@@ -79,4 +68,3 @@ class TestsBlogModify:
         assert "Your post was successfully deleted" in wait_until_visible(browser, (By.ID, "alert_div")).text, \
             "Нет сообщения об успехе"
         assert not element_is_present(browser, (By.XPATH, f'//h1[text()="{title}"]'), 0.5), "Пост не удален"
-

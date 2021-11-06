@@ -17,8 +17,8 @@ class TestAuthorizationClass:
     @pytest.mark.parametrize("email, password", NEGATIVE_LOGIN_CREDENTIALS,
                              ids=["negative email, positive password", "positive email, negative password",
                                   "not valid email, positive password", "not valid data"])
-    def test_login_negative(self, browser, email, password):
-        browser.get(Links.login)
+    def test_login_negative(self, browser, url, email, password):
+        browser.get(url + Links.login)
         login_ui(browser, email, password)
         wait_until_clickable(browser, (By.CLASS_NAME, "button"))
 

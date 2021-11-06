@@ -9,6 +9,7 @@ class MainPage(BasePage):
     CREATE_POST_BUTTON = (By.ID, "new")
     CREATE_POST_SUCCESS_MESSAGE = (By.ID, "alert_div")
     FIRST_POST_TITLE = (By.TAG_NAME, "h1")
+    NOTIFICATION = (By.ID, "alert_div")
 
     def click_on_post_title(self, title):
         self.wait_until_clickable((By.XPATH, self.POST_TITLE.format(title))).click()
@@ -24,7 +25,13 @@ class MainPage(BasePage):
     def check_post_exists(self, title):
         assert self.element_is_present((By.XPATH, self.POST_TITLE.format(title))), "Пост не опубликовался"
 
-    def check_button_new(self) -> bool:
+    def check_button_new(self):
         assert not self.element_is_present((By.ID, "id")), "Кнопка отсутствует"
-        #не додумалась, как написать корректнее. ассерт нот не очень уместен на этой странице
-        #как корректно обработать false из assert в auth_page.py?
+
+    def check_unauthorized_user_cannot_create_post(self):
+        assert not self.element_is_present(self.CREATE_POST_BUTTON, timeout=1)
+
+    def check_post_is_deleted(self, title):
+        assert "Your post was successfully deleted" in self.wait_until_visible(self.NOTIFICATION).text, \
+            "Нет сообщения об успехе"
+        assert not self.element_is_present((By.XPATH, self.POST_TITLE.format(title)), 1), "Пост не удален"

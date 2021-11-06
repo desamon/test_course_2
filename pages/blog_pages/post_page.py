@@ -9,6 +9,7 @@ class PostPage(BasePage):
     EDIT_BUTTON = (By.ID, "edit")
     DELETE_BUTTON = (By.ID, "delete")
     CONFIRM_DELETE = (By.ID, "confirmedDelete")
+    TITLE = (By.TAG_NAME, "h1")
 
     def check_post_text(self, text):
         post_text = self.wait_until_visible(self.POST_TEXT)
@@ -22,4 +23,11 @@ class PostPage(BasePage):
 
     def confirm_delete(self):
         self.wait_until_clickable(self.CONFIRM_DELETE).click()
+
+    def delete_post(self):
+        self.wait_until_clickable(self.DELETE_BUTTON).click()
+        self.wait_until_clickable(self.CONFIRM_DELETE).click()
+
+    def check_title_is_changed(self, new_title):
+        assert self.wait_until_visible(self.TITLE) == new_title, "Заголовок не изменен"
 

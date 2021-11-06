@@ -18,6 +18,12 @@ def delete_user_posts(url):
     delete_all_posts(url)
 
 
+@pytest.fixture(autouse=True)
+def setup(self, browser, url):
+    self.login_page = BasePage(browser, url + Links.login)
+    self.blog_page = MainPage(browser, url + Links.blog)
+
+
 @pytest.fixture()
 def create_post_for_test(url, faker):
     api = BlogApi(url)
@@ -42,7 +48,7 @@ class TestsBlogOpen:
         self.post_page.check_post_text(text)
 
 
-@pytest.mark.usefixtures("delete_user_posts")
+@pytest.mark.usefixtures("delete_user_posts", "login")
 class TestsBlogModify:
     @pytest.fixture(autouse=True)
     def setup(self, browser, url):
@@ -69,21 +75,17 @@ class TestsBlogModify:
         self.blog_page.open_page()
         title, text = create_post_for_test
         self.blog_page.check_post_exists(title)
-        self.blog_page.click_on_post_title(title)  # кликаем по заголовку созданного поста
-        self.post_page.click_edit_button()  # нажимаем на edit для редактирования
-        self.post_modify_page.add_title(Keys.BACKSPACE)  # у заголовка убираем 1 символ в конце
-        self.post_modify_page.click_submit_button()  # сохраняем пост
-
-        assert wait_until_visible(browser, (By.TAG_NAME, 'h1',)).text == title[:-1], "Заголовок не отредактированный"
-        # проверяем с помощью срезов
+        self.blog_page.click_on_post_title(title)
+        self.post_page.click_edit_button()
+        self.post_modify_page.change_title()
+        self.post_modify_page.click_submit_button()
+        self.post_page.check_title_is_changed(title[:-1])
 
     def test_delete_user_post(self, browser, url, create_post_for_test):
-        browser.get(url + Links.blog)
         title, text = create_post_for_test
-        self.blog_page.click_on_post_title(title)  # кликаем по заголовку созданного поста
-        self.post_page.click_delete_button()
-        self.post_page.confirm_delete()  # подтверждаем удаление
+        self.blog_page.open_page()
+        self.blog_page.click_on_post_title(title)
+        self.post_page.delete_post()
+        self.blog_page.check_post_is_deleted(title)
 
-        assert "Your post was successfully deleted" in wait_until_visible(browser, (By.ID, "alert_div")).text, \
-            "Нет сообщения об успехе"
-        assert not element_is_present(browser, (By.XPATH, f'//h1[text()="{title}"]'), 1), "Пост не удален"
+

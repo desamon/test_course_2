@@ -1,29 +1,34 @@
-from webbrowser import Chrome
-import pytest
 from selenium.webdriver.common.by import By
+
 from constants import Links
-from functions import wait_until_clickable
 from pages.blog_pages.main_page import BasePage, MainPage
 
 
+# класс для работы со страницей авторизации (/login)
+
 class AuthPage(BasePage):
-    @pytest.fixture(autouse=True)
-    def setup(self, browser, url):
-        self.login_page = BasePage(browser, url + Links.login)
-        self.blog_page = MainPage(browser, url + Links.blog)
+    EMAIL_FIELD = (By.NAME, "email")
+    PASSWORD_FIELD = (By.NAME, "password")
+    LOGIN_BUTTON = (By.CLASS_NAME, "button")
 
-    def login_ui(self: Chrome, email: str, password: str) -> None:
+    def login_ui(self, email: str, password: str) -> None:
         """Функция логина на стенде через UI"""
-        wait_until_clickable(self, (By.NAME, "email")).send_keys(email)
-        wait_until_clickable(self, (By.NAME, "password")).send_keys(password)
-        wait_until_clickable(self, (By.CLASS_NAME, "button")).click()
-#выделение self пичармом - это же ошибка, а почему он выделяет?
+        self.wait_until_clickable(self.EMAIL_FIELD).send_keys(email)
+        self.wait_until_clickable(self.PASSWORD_FIELD).send_keys(password)
+        self.wait_until_clickable(self.LOGIN_BUTTON).click()
 
-    def logout_auth(self, browser,  url):
-        logout_auth = BasePage(browser, url)
-        blog_page = MainPage(browser, url)
-        self.logout_auth.logout()  # нажимаем на выход
-        self.blog_page.open_page() # открываем страницу блога
+    def check_profile_page_is_open(self):
+        assert self.wait_for_url_to_be(self.url.replace(Links.login, Links.profile))
+
+    def check_page_is_open(self, url):
+        assert self.wait_for_url_to_be(url)
+
+    def check_user_is_authorised(self):
+        assert self.browser.get_cookie("session"), "Куки с session name отсутствует"
+
+
+    def logout_auth(self, browser, url):
+        self.logout_auth.logout()
+        self.blog_page.open_page()
         self.blog_page.check_button_new()
 
-#какие ещё методы нужно было добавить на эту страницу?

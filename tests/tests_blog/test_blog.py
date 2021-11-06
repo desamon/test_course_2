@@ -1,11 +1,8 @@
 import pytest
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 
 from api.api_helpers import delete_all_posts
 from api.blog_api import BlogApi
 from constants import Links
-from functions import wait_until_visible, element_is_present
 from pages.base_page import BasePage
 from pages.blog_pages.main_page import MainPage
 from pages.blog_pages.post_modify_page import PostModifyPage

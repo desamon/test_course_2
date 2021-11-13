@@ -1,3 +1,5 @@
+from selenium.webdriver import Opera, Chrome, Remote
+
 NEGATIVE_LOGIN_CREDENTIALS = [
     ("", "!QAZ2wsx"),
     ("qa_test@test.ru", ""),
@@ -20,3 +22,17 @@ class Links:
 SESSION_COOKIE = {'name': 'session',
                   'value': '.eJwlzjsOwjAMANC7ZGawHX-SXqaKY0ewtnRC3J1KTG99n7KvI89n2d7HlY-yv6JsBaMOY1RaQNzqSp05QsSpazaXI'                  'FATqiOH1qnCbI3SQRHSAmG26k1o9NWhMknrWN37jU0IU45wme5GiyWBHLkj8mzc09y03JHrzOO_ofL9AVk6Le8.YVn0'
                            'oA.WT_USo8F4bTkxwenEGx0DU0ZzwQ'}
+
+VALID_BROWSERS = {
+    "chrome": Chrome,
+    "opera": Opera,
+    "remote": Remote
+}
+
+BROWSER_REMOTE_CAPABILITIES = {
+    "browserName": "chrome",
+    "version": "95.0",
+    "enableVNC": True,
+}
+
+COMMAND_EXECUTOR = 'http://localhost:4444/wd/hub'

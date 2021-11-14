@@ -29,5 +29,5 @@ class PostPage(BasePage):
         self.wait_until_clickable(self.CONFIRM_DELETE).click()
 
     def check_title_is_changed(self, new_title):
-        assert self.wait_until_visible(self.TITLE) == new_title, "Заголовок не изменен"
+        assert not self.wait_until_visible(self.TITLE) == new_title, "Заголовок не изменен"
 

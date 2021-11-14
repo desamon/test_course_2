@@ -1,15 +1,15 @@
 from typing import Tuple
 
+import BY as BY
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
 from selenium.webdriver.remote.webdriver import WebElement
-from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 
 
 # класс с общими хэлперами и методами для работы с элементами, которые расположены на каждой странице
 class BasePage:
-    logout = ec.element_to_be_clickable("a[href*='/logout']")
+    logout = (BY.XPATH, "a[href*='/logout']")
 
     def __init__(self, browser: Chrome, url):
         self.browser = browser
@@ -52,3 +52,6 @@ class BasePage:
             return True
         except TimeoutException:
             return False
+
+    def check_user_is_authorised(self):
+        assert self.browser.get_cookie("session"), "Куки с session name отсутствует"

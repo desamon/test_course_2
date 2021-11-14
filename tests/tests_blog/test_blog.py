@@ -15,12 +15,6 @@ def delete_user_posts(url):
     delete_all_posts(url)
 
 
-@pytest.fixture(autouse=True)
-def setup(self, browser, url):
-    self.login_page = BasePage(browser, url + Links.login)
-    self.blog_page = MainPage(browser, url + Links.blog)
-
-
 @pytest.fixture()
 def create_post_for_test(url, faker):
     api = BlogApi(url)

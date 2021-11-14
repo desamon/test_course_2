@@ -1,4 +1,3 @@
-import pytest
 from selenium.webdriver import Chrome
 from constants import Links
 from api.api_client import Client

@@ -1,7 +1,6 @@
-import pytest
 from selenium.webdriver import Chrome
 from constants import Links
-
+from api.api_client import Client
 import random
 import pytest
 
@@ -42,3 +41,12 @@ def pytest_addoption(parser):
 @pytest.fixture(scope='session', autouse=True)
 def faker_seed():
    return random.randint(0, 9999)
+
+
+@pytest.fixture()
+def login(browser, url):
+    cookie = Client(url).auth()
+    browser.get(url)
+    browser.add_cookie({"name": "session", "value": cookie["session"]})
+    browser.refresh()
+

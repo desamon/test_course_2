@@ -1,5 +1,4 @@
 import pytest
-from typing import List, Union, Dict
 from api.api_client import Client
 
 
@@ -9,5 +8,4 @@ def login(browser, url):
     browser.get(url)
     browser.add_cookie({"name": "session", "value": cookie["session"]})
     browser.refresh()
-
 

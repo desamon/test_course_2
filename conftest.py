@@ -46,12 +46,6 @@ def pytest_configure(config):
     )
 
 
-def pytest_addoption(parser):
-    parser.addoption(
-        "--env", default="prod"
-    )
-
-
 @pytest.fixture(scope='session', autouse=True)
 def faker_seed():
     return random.randint(0, 9999)

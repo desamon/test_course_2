@@ -1,15 +1,16 @@
 from typing import Tuple
 
-import BY as BY
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Chrome
+from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
 
 
 # класс с общими хэлперами и методами для работы с элементами, которые расположены на каждой странице
 class BasePage:
-    logout = (BY.XPATH, "a[href*='/logout']")
+    LOGOUT = (By.CSS_SELECTOR, "a[href*='/logout']")
 
     def __init__(self, browser: Chrome, url):
         self.browser = browser
@@ -19,7 +20,7 @@ class BasePage:
         self.browser.get(self.url)
 
     def logout(self):
-        self.logout.click()
+        self.wait_until_clickable(self.LOGOUT).click()
 
     def wait_for_url_to_be(self, url: str, timeout: int = 5) -> bool:
         """Ждём, пока URL страницы не начнёт соответствовать ожидаемому"""
